@@ -1,0 +1,9 @@
+.container {
+  box-shadow: 2px 2px 2px 2px #ccc;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+
+  justify-content: space-between;
+  font-size: 1rem;
+}
