@@ -22,8 +22,8 @@ export default function Home() {
     }
     files.forEach((file, i) => {
       upLoadFile(file)
-      .then((res) => console.log(res?.statusText))
-      .catch((err) => console.log(err.message))
+        .then((res) => console.log(res?.statusText))
+        .catch((err) => console.log(err.message))
     });
   }
 
@@ -49,22 +49,36 @@ export default function Home() {
   const PATH = 'Music';
 
   async function upLoadFile(data: File) {
+    const dirName = new Date().toLocaleString().replaceAll(':', '-')
     try {
-      const res = await fetch(`https://cloud-api.yandex.net/v1/disk/resources/upload?path=%2F${PATH}%2F${data.name}`, {
-        method: 'GET',
+      const createDir = await fetch(`https://cloud-api.yandex.net/v1/disk/resources?path=%2F${dirName}`, {
+        method: "PUT",
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Authorization': 'OAuth ' + process.env.NEXT_PUBLIC_KEY
         }
       })
-      if (res.ok) {
-        const { href } = await res.json()
-        return await fetch(href, {
-          method: "PUT",
-          body: data
+      if (createDir.ok) {
+        const getLink = await fetch(`https://cloud-api.yandex.net/v1/disk/resources/upload?path=%2F${PATH}%2F${data.name}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'OAuth ' + process.env.NEXT_PUBLIC_KEY
+          }
         })
+        if (getLink.ok) {
+          const { href } = await getLink.json()
+          return await fetch(href, {
+            method: "PUT",
+            body: data
+          })
+        }
+        await getLink.json()
+          .then((message) => Promise.reject(message))
       }
-      await res.json().then((message) => Promise.reject(message))
+      await createDir.json()
+        .then((message) => Promise.reject(message))
     } catch (err) {
       throw err
     }
