@@ -1,0 +1,22 @@
+.file {
+  display: grid;
+  grid-template-columns: 64px 20% auto;
+  grid-gap: 10px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.layout {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.span {
+  position: absolute;
+  margin-right: 6px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #136086;
+}
