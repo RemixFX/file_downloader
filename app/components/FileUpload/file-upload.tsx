@@ -2,12 +2,15 @@
 
 import { ChangeEvent } from 'react'
 import styles from './file-upload.module.css'
+import { FilesToUpload } from '@/app/page'
 
-export default function FileUpload({addFile}: {addFile: (files: File[]) => void}) {
+export default function FileUpload({addFile}: {addFile: (files: FilesToUpload[]) => void}) {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const fileList: FileList = e.target.files!
-    const newFilesArray: File[] = Array.from(fileList)
+    const newFilesArray: FilesToUpload[] = Array.from(fileList).map((file) => {
+      return {file, status: 'ready'}
+    })
     addFile(newFilesArray)
   } 
 
