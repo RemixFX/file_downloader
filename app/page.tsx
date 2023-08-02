@@ -16,7 +16,6 @@ export interface FilesToUpload {
 
 export default function Home() {
   const [files, setFiles] = useState<FilesToUpload[]>([])
-  const [authKey, setAuthKey] = useState<string>(process.env.NEXT_PUBLIC_KEY!)
   const [profile, setProfile] = useState({
     name: 'in-moment',
     authKey: process.env.NEXT_PUBLIC_KEY,
