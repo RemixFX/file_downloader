@@ -1,9 +1,13 @@
 "use client"
 import styles from './page.module.css'
-import { useCallback, useState } from 'react'
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react'
 import File from './components/File/file';
 import FileUpload from './components/FileUpload/file-upload';
-
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation'
+import logo from '@/public/logo.png'
+import userAvatar from '@/public/user.svg'
 
 export interface FilesToUpload {
   file: File
@@ -11,7 +15,48 @@ export interface FilesToUpload {
 }
 
 export default function Home() {
-  const [files, setFiles] = useState<FilesToUpload[]>([]);
+  const [files, setFiles] = useState<FilesToUpload[]>([])
+  const [authKey, setAuthKey] = useState<string>(process.env.NEXT_PUBLIC_KEY!)
+  const [profile, setProfile] = useState({
+    name: 'in-moment',
+    authKey: process.env.NEXT_PUBLIC_KEY,
+    avatar: logo
+  })
+
+  const params = useSearchParams()
+  const router = useRouter();
+
+  useEffect(() => {
+    const code = params.get('code')
+    if (code) {
+      (async () => {
+        try {
+          const urlencoded = new URLSearchParams();
+          urlencoded.append("grant_type", "authorization_code");
+          urlencoded.append("code", code);
+          const response = await fetch(`https://oauth.yandex.ru/token`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Authorization": "Basic OWFmZjE2ZWY0NDgwNGE5MDliNjFmZDJiYjlkNDUyMDA6NzJjZGUzMWI5OGNhNDM0MGJhY2RjNzc3MjFkYjQ4ZGQ="
+            },
+            body: urlencoded
+          });
+
+          const res = await response.json();
+          setProfile({
+            name: 'Yandex-user',
+            authKey: res.access_token,
+            avatar: userAvatar
+          })
+          router.replace('/')
+        } catch (err: any) {
+          throw new Error(err);
+        }
+      })()
+    }
+  }, [params, router])
+
   const addFile = (filesArr: FilesToUpload[]) => {
     if (files) {
       setFiles(files.concat(filesArr))
@@ -37,7 +82,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'OAuth ' + process.env.NEXT_PUBLIC_KEY
+          'Authorization': 'OAuth ' + profile.authKey
         }
       });
 
@@ -106,7 +151,7 @@ export default function Home() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'OAuth ' + process.env.NEXT_PUBLIC_KEY
+          'Authorization': 'OAuth ' + profile.authKey
         }
       });
 
@@ -132,9 +177,25 @@ export default function Home() {
     }
   }
 
+
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>Загрузчик файлов на Яндекс.Диск</h1>
+      <h1 className={styles.title}>Загрузчик файлов на
+        <Link href={'https://disk.yandex.ru/client/disk'} className={styles.link}>
+          {` ${profile.name !== 'in-moment' ? 'ваш' : ''} Яндекс.Диск`}
+        </Link>
+      </h1>
+
+      <Image className={styles.logo} src={profile.avatar} alt={profile.name}></Image>
+      {profile.name === 'in-moment' &&
+        <div className={styles.info}>
+          <p className={styles.info_text}>Загрузка файлов по умолчанию на диск компании in-moment. Для загрузки на свой диск,</p>
+          <Link href={'https://oauth.yandex.ru/authorize?response_type=code&client_id=9aff16ef44804a909b61fd2bb9d45200'}
+            className={styles.link}>
+            авторизуйтесь в аккаунте Яндекс
+          </Link>
+        </div>}
+
       <FileUpload addFile={addFile} />
       {files.length !== 0 &&
         <div className={styles.container}>

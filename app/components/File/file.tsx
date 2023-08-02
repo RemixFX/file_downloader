@@ -17,7 +17,7 @@ export default function File({ file }: { file: FilesToUpload }) {
   return (
     <li className={styles.file}>
       <div className={styles.layout}>
-        <Image src={newFile} alt={file.file.name}></Image>
+        <Image src={newFile} placeholder="blur" alt={file.file.name}></Image>
         <span className={styles.span}>{getLastPart()}</span>
       </div>
       <p className={styles.description}>{file.file.name}</p>
